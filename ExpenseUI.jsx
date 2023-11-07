@@ -1,45 +1,26 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import { Appbar, Card, TextInput as PaperTextInput } from 'react-native-paper';
-
-const categories = [
-  'Food',
-  'Transportation',
-  'Housing',
-  'Utilities',
-  'Healthcare',
-  'Education',
-  'Entertainment',
-  'Groceries',
-  'Clothing',
-  'Dining Out',
-  'Travel',
-  'Shopping',
-  'Insurance',
-  'Rent',
-  'Loan',
-  'Gifts',
-  'Charity',
-  'Utilities',
-  'Other',
-];
+import { View } from 'react-native';
+import { Appbar, Card, Button } from 'react-native-paper';
+import ExpenseForm from './ExpenseForm';
+import styles from './styles'; 
 
 const ExpenseScreen = () => {
-  const [date, setDate] = useState(new Date());
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('Food');
-  const [description, setDescription] = useState('');
+  const [isFormValid, setFormValid] = useState(true);
+  const [expenseData, setExpenseData] = useState(null);
 
-  const captureExpense = () => {
-    // Implement your logic for capturing and storing expenses
+  const captureExpense = (data) => {
+    setFormValid(true); // Reset validation error
+    if (validateData(data)) {
+      setExpenseData(data);
+    } else {
+      setFormValid(false);
+    }
   };
 
-  const validateData = (date, amount, category) => {
+  const validateData = (data) => {
     // Implement your validation logic here
-    return true;
+    return !!data.amount; // Example: Require amount to be filled
   };
-  
 
   return (
     <View style={styles.container}>
@@ -48,60 +29,27 @@ const ExpenseScreen = () => {
       </Appbar.Header>
       <Card>
         <Card.Content>
-          <PaperTextInput
-            label="Enter expense date"
-            value={date.toISOString()}
-            onChangeText={setDate}
-            style={styles.input}
-          />
-          <PaperTextInput
-            label="Enter expense amount"
-            value={amount}
-            onChangeText={(text) => setAmount(text)}
-            keyboardType="numeric"
-            style={styles.input}
-          />
-          <Picker
-            selectedValue={category}
-            onValueChange={(itemValue) => setCategory(itemValue)}
-            style={styles.input}
-          >
-            {categories.map((cat, index) => (
-              <Picker.Item key={index} label={cat} value={cat} />
-            ))}
-          </Picker>
-          <PaperTextInput
-            label="Enter optional description"
-            value={description}
-            onChangeText={(text) => setDescription(text)}
-            style={styles.input}
-          />
+          {isFormValid ? (
+            <ExpenseForm
+              captureExpense={captureExpense}
+              styles={styles} // Pass the styles to the ExpenseForm
+            />
+          ) : (
+            <ValidationError message="Please enter a valid amount" />
+          )}
         </Card.Content>
         <Card.Actions>
-          <Button title="Capture Expense" 
-          onPress={captureExpense}
-          style={styles.button} />
+          <Button
+            mode="contained"
+            onPress={captureExpense}
+            style={[styles.button, styles.datePickerButton]} // Apply styles
+          >
+            Capture Expense
+          </Button>
         </Card.Actions>
       </Card>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  title: {
-    fontSize: 20,
-    marginBottom: 16,
-  },
-  input: {
-    marginBottom: 12,
-  },
-  button: {
-    marginTop: 20,
-  },
-});
 
 export default ExpenseScreen;
